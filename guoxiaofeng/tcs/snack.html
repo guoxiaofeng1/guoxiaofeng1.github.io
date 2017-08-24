@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        *{
+            padding: 0;
+            margin: 0;
+        }
+        body{
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        .box1{
+            width: 100%;
+            height: 665px;
+            overflow: hidden;
+            background:url("05.jpg") center 5px no-repeat;
+            background-size: cover;
+        }
+        .box{
+            width: 600px;
+            height:600px ;
+            border: 1px solid #fff;
+            margin: 0 auto;
+            margin-top: 20px;
+            background-color: #F09B76;
+        }
+        .box>div{
+            float: left;
+            width: 30px;
+            height: 30px;
+            border: 1px solid #fff;
+            box-sizing: border-box;
+        }
+        .food{
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: blue;
+        }
+        .alert{
+            width: 414px;
+            height: 250px;
+            position: absolute;
+            left: 0;
+            right: 0;
+            margin: auto;
+            top:100px;
+            background:url("05.jpg") center center no-repeat;
+            background-size: cover;
+            border-radius: 50px;
+            display: none;
+            border: 1px solid #000;
+        }
+        .alert>h1{
+            font-size: 60px;
+            font-family: 华文新魏;
+            text-align: center;
+            line-height: 200px;
+            font-weight: 700;
+
+        }
+        .reload{
+            width: 150px;
+            height: 50px;
+            font-size: 26px;
+            line-height: 50px;
+            text-align: center;
+            position: absolute;
+            left: 0;
+            right: 0;
+            margin: auto;
+            bottom: 50px;
+            background-color: #3A5B26;
+            color: #fff;
+        }
+        .score,.guanka,.start,.stop{
+            width: 150px;
+            height: 50px;
+            position: absolute;
+            border-radius: 20px;
+            border: 1px solid #000;
+            line-height: 50px;
+            text-align: center;
+            font-size: 26px;
+            font-family: 华文新魏;
+            background-color: #cc5577;
+            color: #fff;
+        }
+        .score{
+            left: 11%;
+            top:150px;
+        }
+        .guanka{
+            left: 11%;
+            top:250px;
+        }
+        .start{
+            left: 11%;
+            top:350px;
+            cursor: pointer;
+        }
+        .stop{
+            left: 11%;
+            top:450px;
+            cursor: pointer;
+        }
+        .block {
+            width: 30px;
+            height: 30px;
+            box-sizing: border-box;
+            /*border: 1px solid #a4a4a4;*/
+            /*border-radius: 50%;*/
+            float: left;
+        }
+
+        .snackbody {
+            background: url("02.png") center center no-repeat;
+            background-size: cover;
+        }
+
+        .snackhead {
+            background: url("01.png") center center no-repeat;
+            background-size: cover;
+        }
+
+        .food{
+            background: url("02.png") center center no-repeat;
+            background-size: cover;
+        }
+    </style>
+</head>
+<body>
+<div class="box1">
+    <div class="box">
+
+    </div>
+    <div class="score">
+        得分:  <span>0</span>
+    </div>
+    <div class="guanka">
+        关卡:  <span>0</span>
+    </div>
+    <div class="start">开始</div>
+    <div class="stop">暂停</div>
+</div>
+<div class="alert">
+    <h1>Game Over</h1>
+    <button class="reload">再来一局</button>
+</div>
+</body>
+<script src="js/jquery.js"></script>
+<script>
+    //获取相关元素
+    var Score=$('.score>span');
+    var Guanka=$('.guanka>span');
+    var score=0;
+    var guanka=0;
+    var speed=$('.speed');
+    var start=$('.start');
+    var stop=$('.stop');
+    //设计场景
+    for (var i=0; i < 20; i++) {
+        for (var j=0; j < 20; j++) {
+            //给场景添加div，每个div设置id属性，插入到scene里面
+            $("<div></div>").addClass("block").attr("id", j + "-" + i).appendTo(".box");
+        }
+    }
+    //设置蛇的初始长度
+    var snackArr=[{x: 0, y: 0}, {x: 1, y: 0}, {x: 2, y: 0}];
+    //设置蛇头的位置
+    var snackHead=snackArr[snackArr.length - 1];
+
+    function drawSnack() {
+        $(".snackbody").removeClass("snackbody");
+        $(".snackhead").removeClass("snackhead");
+        $.each(snackArr, function (index, value) {
+            //正常移动时保证头身体位置不发生其他变化
+            $("#" + value.x + "-" + value.y).addClass("snackbody");
+        });
+        $("#" + snackHead.x + "-" + snackHead.y).addClass("snackhead");
+    }
+    drawSnack();
+    var dir="r";
+    var t;
+    var n=0;
+    start.click(function () {
+        //点击开始按钮触发时间函数
+        t=setInterval(move,200);
+        stop.click(function () {
+            //点击一次开关关闭时间函数，双击开关打开时间函数
+            n++;
+            if(n%2==1){
+                clearInterval(t);
+                stop.css('background','#C60A0A');
+            }else if(n%2==0){
+                t=setInterval(move,200);
+                stop.css('background','#CC5577');
+            }
+        })
+    });
+    //蛇的运动方式上下左右
+    function move() {
+        switch (dir) {
+            case "r":
+                snackHead={x: snackHead.x + 1, y: snackHead.y};
+                break;
+            case "l":
+                snackHead={x: snackHead.x - 1, y: snackHead.y};
+                break;
+            case "t":
+                snackHead={x: snackHead.x, y: snackHead.y - 1};
+                break;
+            case "b":
+                snackHead={x: snackHead.x, y: snackHead.y + 1};
+                break;
+        }
+        snackArr.push(snackHead);
+        //蛇头的位置参数
+        var head=$("#"+snackHead.x+"-"+snackHead.y);
+        //游戏结束的条件
+        if(head.hasClass("snackbody")||head.length===0){
+            clearInterval(t);
+            //弹出结束选卡
+            $('.alert').css('display','block');
+            $('.box1').css('opacity','0.3');
+            $('.box').css('opacity','0.3');
+            return;
+        }
+        //
+        if(head.hasClass("food")){
+            head.removeClass("food");
+            score++;
+            Score.html(score);
+            createFood();
+        }
+//        else if(score>5){
+//            Guanka.html(1)
+//        }
+        else{
+            snackArr.shift();
+        }
+        drawSnack();
+    }
+//    setInterval(move, 200);
+    $(document).keydown(function (e) {
+        switch (e.keyCode) {
+            case 65:
+            case 37:
+                dir="l";
+                break;
+            case 87:
+            case 38:
+                dir="t";
+                break;
+            case 68:
+            case 39:
+                dir="r";
+                break;
+            case 83:
+            case 40:
+                dir="b";
+                break;
+        }
+    });
+    //随机获取事物的位置
+    function createFood() {
+        do {
+            var rx=Math.floor(Math.random() * 20);
+            var ry=Math.floor(Math.random() * 20);
+        }while($("#"+rx+"-"+ry).hasClass("snackbody"));
+        $("#"+rx+"-"+ry).addClass("food");
+    }
+    createFood();
+
+
+
+
+    $('.reload').click(function(){
+        history.go(0);
+    })
+
+</script>
+</html>

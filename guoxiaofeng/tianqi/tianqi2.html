@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>tianqi2</title>
+	<script src="jquery.js"></script>
+</head>
+<style>
+*{
+	padding: 0;
+	margin: 0;
+	list-style: none;
+}
+	body{
+    background: url(tianqi3.jpg) no-repeat;
+    font-size: 14px;
+    font-family: "microsoft yahei";
+    -webkit-background-size: 100%;
+    background-size: 100%;
+    color: #222;
+	}
+	header{
+    height: 50px;
+    padding-left: 80px;
+    background: rgba(100, 100, 100, 0.6);
+	}
+	header h1{
+    padding-right: 30px;
+    line-height: 50px;
+    font-size: 30px;
+    float: left;
+	}
+	header .searchbox{
+	margin-top: 15px;
+    float: left;
+    background: #fff;
+	}
+	select{
+	border: 1px solid #fff;
+	}
+	button{
+    background: #fff;
+    border: 1px solid #fff;
+	}
+	section{
+    padding-top: 90px;
+    font-size: 20px;
+	}
+	section .today{
+    width: 900px;
+    height: 100px;
+    margin: 0 auto;
+    padding: 20px;
+    background: rgba(100,100,100,0.3);
+    overflow: hidden;
+    position: relative;
+	}
+	section .next{
+    margin: 80px auto 0 auto;
+    width: 950px;
+    text-align: center;
+    overflow: hidden;		
+	}
+	.nextday{
+    float: left;
+    width: 150px;
+    padding: 20px 0;
+    margin: 0 20px;
+    background: rgba(100, 100, 100, 0.3);		
+	}
+	.nextday:hover{
+		background: rgba(255, 255, 255, 0.8);
+	}
+	.nextday:nth-child(1){
+        display: none;
+	}
+	.nextday:nth-child(7){
+        display: none;
+	}
+	.searchbox{
+		background: #dfdffd;
+	}
+	#icon{
+        position: absolute;
+        left: 50px;
+        top: 40px;
+	}
+	.shijian{
+		position: absolute;
+        left: 160px;
+        top: 10px;
+		/* background: red; */
+		/* margin-left: 10px; */
+		/* float: left; */
+	}
+	.shijian span{
+		margin-left: 40px;
+	}
+	.wendu{
+		position: absolute;
+        left: 140px;
+        top: 40px;
+        font-size: 16px;
+	}
+    .wendu span{
+    	margin-left: 20px;
+    }
+	#pm{
+		position: absolute;
+        left: 160px;
+        top: 70px;
+        font-size: 16px;
+	}
+	#jianyi{
+		position: absolute;
+        left: 160px;
+        top: 100px;	
+        font-size: 16px;	
+	}
+</style>
+<body>
+	<header>
+		<h1>WEATHER</h1>
+		<div class="searchbox">
+			<select name="proveince" id="proveince">
+	            <option value="">省</option>
+	        </select>
+	        <select name="city" id="city">
+	            <option value="">市</option>
+	        </select>
+	        <select name="town" id="town">
+	            <option value="">县</option>
+	        </select>
+	        <button>当地天气</button>
+		</div>
+	</header>
+	<section>
+		<div class="today">
+	        <div id="icon"><img src="tianqi1.png" alt=""></div>
+	        <div class="shijian">
+		        <span id="didian">夏县</span><span>|</span>
+	            <span id="Date">2017年8月16日</span><span>|</span>
+	            <span id="day">星期三</span><span>|</span>
+	            <span id="duoyun">多云</span>
+	        </div>
+            <div class="wendu">
+            	<!-- <span id="now">30℃</span>    -->
+	        	<span id="zuidi">今日温度: <a>21℃</a></span><span>~</span>
+	        	<span id="zuigao"> <a>30℃</a></span>
+	            <span id="fengxiang">东风</span>
+	            <span id="wuran">污染指数</span>
+            </div>
+            
+            <p id="pm">PM</p>
+            <p id="jianyi">建议</p>
+        </div>
+
+		<div class="next">
+			<!-- <div class="nextday"></div>
+			<div class="nextday"></div>
+			<div class="nextday"></div>
+			<div class="nextday"></div>
+			<div class="nextday"></div> -->
+		</div>
+	</section>
+	<footer></footer>
+</body>
+<script>
+	    $(document).ready(function () {
+        $("#proveince").click(function () {
+            if ($(this).value==0){
+                return;
+            }
+            $.ajax({
+                url:'http://api.jisuapi.com/area/province?appkey=53846daa738ecddb',
+                dataType:"jsonp",
+            }).done(function (obj) {
+                if($(this).value==0){
+                    return;
+                }
+                $.each(obj.result,function (index,value) {
+                    $("<option>").attr("value",value.id).html(value.name).appendTo($("#proveince"));
+                })
+            })
+        }).change(function () {
+            $("#city,#town").children(value=0).nextAll().remove();
+                $.ajax({
+                    url:"http://api.jisuapi.com/area/city?parentid="+$(this).val()+"&appkey=53846daa738ecddb",
+                    dataType:"jsonp",
+                }).done(function (obj) {
+                    if($(this).value==0){
+                        return;
+                    }
+                    $.each(obj.result,function (index,value) {
+                        $("<option>").attr("value",value.id).html(value.name).appendTo($("#city"));
+                    })
+                })
+        });
+        $("#city").change(function () {
+            $("#town").children(value=0).nextAll().remove();
+            $.ajax({
+                url:"http://api.jisuapi.com/area/town?parentid="+$(this).val()+"&appkey=53846daa738ecddb",
+                dataType:"jsonp",
+            }).done(function (obj) {
+                if($(this).value==0){
+                    return;
+                }
+                $.each(obj.result,function (index,value) {
+                    $("<option>").attr("value",value.id).html(value.name).appendTo($("#town"));
+                })
+            })
+        })
+        $("button").click(function () {
+            let didian=$("#town").find("option:selected").text();
+            $.ajax({
+                dataType: "JSONP",
+                url:"http://api.jisuapi.com/weather/query?appkey=53846daa738ecddb&city="+didian,
+                success:function (text) {
+                    let result = text.result;
+                    $("#icon").html(`<img src="天气图标/weathercn02/${result.img}.png">`);
+                    $("#didian").html(`${result.city}`);
+                    $("#Date").html(`${result.date}`);
+                    $("#day").html(`${result.week}`);
+                    $("#duoyun").html(`${result.weather}`);
+                    console.log(result.week)
+                    $("#now").html(`今日温度 ${result.temp}℃`);
+                    $("#zuidi").html(`最低气温 ${result.templow}℃`);
+                    $("#zuigao").html(`最高气温 ${result.temphigh}℃`);                    
+                    $("#fengxiang").html(`${result.winddirect}`);
+                    $("#wuran").html(`空气污染:${result.aqi.quality}`);
+                    $("#pm").html(`PM2.5:${result.aqi.pm2_5}`);
+                    $("#jianyi").html(`建议:${result.index[3].detail}`);
+
+
+
+
+
+
+
+		           var str2="";
+				    $(".next ").empty();
+				    $.each(result.daily,function (index,val) {
+				        str2+=`<div class="nextday"><li>
+				        
+                        <img src="天气图标/weathercn02/${val.day.img}.png" alt="">
+                        <p id="days">${val.date}&nbsp;${val.week}</p>
+                        <p id="weathers">${val.day.weather}</p>
+                        <p id='wencha'>${val.day.temphigh}℃~${val.night.templow}℃</p>
+                        <p id='feng'>${val.day.winddirect};${val.day.windpower}</p>
+         
+
+
+
+				                   
+				                </li></div>`
+				    })
+				    console.log(str2)
+				    $(".next ").html(str2);
+
+
+
+
+                }
+            })
+        })
+        // $.getScript("http://int.dpool.sina.com.cn/iplookup/iplookup.php?format=js",function(){
+        //         var city=remote_ip_info.city;
+                
+        //     });
+ 
+    })
+
+</script>
+</html>
